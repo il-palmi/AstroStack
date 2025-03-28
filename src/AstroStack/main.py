@@ -1,5 +1,6 @@
 from src.AstroStack.gui import MainWindow
-from src.AstroStack.gui.CustomDialogs import OpenPictureDialog
+from src.AstroStack.gui.CustomDialogs import FileSelectorDialog
+from src.AstroStack.utils.flags import *
 from gi.repository import Gtk, GdkPixbuf
 from astropy.io import fits
 import numpy as np
@@ -8,15 +9,22 @@ class AstroStack(MainWindow.MainWindow):
     def __init__(self):
         super().__init__()
 
+        # Tables data
+        self.lightsListStore = FilesListStore()
+        self.darksListStore = FilesListStore()
+        self.flatsListStore = FilesListStore()
+        self.biasListStore = FilesListStore()
+
         # Header bar connections
         self.openPictureButton.connect("clicked", self.open_picture)
         self.previewFillButton.connect("clicked", self.preview_fill)
 
+        # Pictures buttons connections
+        self.lightsButton.connect("clicked", self.select_files)
         self.window.connect("size_allocate", self.on_size_allocate)
 
     def open_picture(self, widget):
-        dialog = OpenPictureDialog(self)
-
+        dialog = FileSelectorDialog(parent_widget=self, multiple_files=False)
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
@@ -26,6 +34,24 @@ class AstroStack(MainWindow.MainWindow):
             else:
                 self.originalPreviewPixbuf = GdkPixbuf.Pixbuf.new_from_file(file_path)
             self.preview_fill(None)
+            self.headerBar.set_subtitle(file_path)
+        dialog.destroy()
+
+    def select_files(self, widget: Gtk.Button):
+        dialog = FileSelectorDialog(parent_widget=self, multiple_files=True)
+        response = dialog.run()
+        frames_type = widget.get_label().lower()
+
+        if response == Gtk.ResponseType.OK:
+            files = dialog.get_files()
+            if frames_type == LIGHTS:
+                self.lightsListStore.files = files
+            elif frames_type == DARKS:
+                self.darksListStore.files = files
+            elif frames_type == FLATS:
+                self.flatsListStore.files = files
+            elif frames_type == BIAS:
+                self.biasListStore.files = files
 
         dialog.destroy()
 
@@ -79,6 +105,11 @@ class AstroStack(MainWindow.MainWindow):
         if self.originalPreviewPixbuf:
             self.preview_fill(None)
 
+
+class FilesListStore(Gtk.ListStore):
+    def __init__(self):
+        super().__init__(str, str, str)
+        self.files = []
 
 if __name__ == "__main__":
     app = AstroStack()
