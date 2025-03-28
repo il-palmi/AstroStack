@@ -1,13 +1,13 @@
 import gi
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
+from gi.repository import Gtk, GdkPixbuf
 from typing import cast
 
 class MainWindow(Gtk.Application):
     def __init__(self):
         super().__init__()
         builder = Gtk.Builder()
-        builder.add_from_file("ui/mainWindow.glade")
+        builder.add_from_file("src/AstroStack/gui/mainWindow.glade")
 
         # Main window
         self.window = cast(Gtk.Window, builder.get_object("mainWindow"))
