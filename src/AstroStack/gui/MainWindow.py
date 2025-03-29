@@ -31,8 +31,12 @@ class MainWindow(Gtk.Application):
         self.previewImage = cast(Gtk.Image, builder.get_object("previewImage"))
         self.originalPreviewPixbuf = None
 
-        # Files tables
-        self.lightsTreeView = cast(Gtk.TreeView, builder.get_object("previewScrolledWindow"))
+        # Lights tree view
+        self.lightsTreeView = cast(Gtk.TreeView, builder.get_object("lightsTreeView"))
+        self.add_treeview_column(self.lightsTreeView, "File name", 0)
+        self.add_treeview_column(self.lightsTreeView, "Date", 1)
+        self.add_treeview_column(self.lightsTreeView, "File type", 2)
+
 
         # Pictures tab
         self.lightsButton = cast(Gtk.Button, builder.get_object("lightsButton"))
@@ -42,3 +46,11 @@ class MainWindow(Gtk.Application):
 
         # Init window
         self.window.show_all()
+
+    @staticmethod
+    def add_treeview_column(treeview, titolo, col_index):
+        """Crea e aggiunge una colonna al TreeView."""
+        renderer = Gtk.CellRendererText()  # Renderer per testo
+        column = Gtk.TreeViewColumn(titolo, renderer, text=col_index)
+        column.set_sort_column_id(col_index)  # Abilita l'ordinamento
+        treeview.append_column(column)

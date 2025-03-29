@@ -1,3 +1,6 @@
+import os.path
+from datetime import datetime
+
 from src.AstroStack.gui import MainWindow
 from src.AstroStack.gui.CustomDialogs import FileSelectorDialog
 from src.AstroStack.utils.flags import *
@@ -5,12 +8,14 @@ from gi.repository import Gtk, GdkPixbuf
 from astropy.io import fits
 import numpy as np
 
+
 class AstroStack(MainWindow.MainWindow):
     def __init__(self):
         super().__init__()
 
         # Tables data
         self.lightsListStore = FilesListStore()
+        self.lightsTreeView.set_model(self.lightsListStore)
         self.darksListStore = FilesListStore()
         self.flatsListStore = FilesListStore()
         self.biasListStore = FilesListStore()
@@ -43,15 +48,19 @@ class AstroStack(MainWindow.MainWindow):
         frames_type = widget.get_label().lower()
 
         if response == Gtk.ResponseType.OK:
-            files = dialog.get_files()
-            if frames_type == LIGHTS:
-                self.lightsListStore.files = files
-            elif frames_type == DARKS:
-                self.darksListStore.files = files
-            elif frames_type == FLATS:
-                self.flatsListStore.files = files
-            elif frames_type == BIAS:
-                self.biasListStore.files = files
+            files = dialog.get_filenames()
+
+            match frames_type:
+                case t if t == LIGHTS:
+                    self.lightsListStore.add_files(files)
+                case t if t == DARKS:
+                    self.darksListStore.add_files(files)
+                case t if t == FLATS:
+                    self.flatsListStore.add_files(files)
+                case t if t == BIAS:
+                    self.biasListStore.add_files(files)
+
+        print(self.lightsListStore)
 
         dialog.destroy()
 
@@ -109,7 +118,14 @@ class AstroStack(MainWindow.MainWindow):
 class FilesListStore(Gtk.ListStore):
     def __init__(self):
         super().__init__(str, str, str)
-        self.files = []
+
+    def add_files(self, files: list[str]):
+        for file in files:
+            file_name = os.path.splitext(file)[0]
+            file_date = datetime.utcfromtimestamp(os.path.getmtime(file)).strftime('%Y-%m-%d %H:%M:%S')
+            file_type = os.path.splitext(file)[1]
+            self.append([file_name, file_date, file_type])
+
 
 if __name__ == "__main__":
     app = AstroStack()
