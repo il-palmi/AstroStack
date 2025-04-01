@@ -34,8 +34,9 @@ class MainWindow(Gtk.Application):
         # Lights tree view
         self.lightsTreeView = cast(Gtk.TreeView, builder.get_object("lightsTreeView"))
         self.add_treeview_column(self.lightsTreeView, "File name", 0)
-        self.add_treeview_column(self.lightsTreeView, "Date", 1)
-        self.add_treeview_column(self.lightsTreeView, "File type", 2)
+        self.add_treeview_column(self.lightsTreeView, "File type", 1)
+        self.add_treeview_column(self.lightsTreeView, "Date", 2)
+        self.add_treeview_column(self.lightsTreeView, "Path", 3)
 
 
         # Pictures tab

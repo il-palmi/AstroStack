@@ -1,5 +1,5 @@
 import os.path
-from datetime import datetime
+from datetime import datetime, timezone
 
 from src.AstroStack.gui import MainWindow
 from src.AstroStack.gui.CustomDialogs import FileSelectorDialog
@@ -117,14 +117,15 @@ class AstroStack(MainWindow.MainWindow):
 
 class FilesListStore(Gtk.ListStore):
     def __init__(self):
-        super().__init__(str, str, str)
+        super().__init__(str, str, str, str)
 
     def add_files(self, files: list[str]):
         for file in files:
-            file_name = os.path.splitext(file)[0]
-            file_date = datetime.utcfromtimestamp(os.path.getmtime(file)).strftime('%Y-%m-%d %H:%M:%S')
+            file_name = os.path.basename(file).split(".")[0]
+            file_date = datetime.fromtimestamp(os.path.getmtime(file), timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
             file_type = os.path.splitext(file)[1]
-            self.append([file_name, file_date, file_type])
+            file_path = os.path.dirname(file)
+            self.append([file_name, file_type, file_date, file_path])
 
 
 if __name__ == "__main__":
